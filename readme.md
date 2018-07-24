@@ -1,60 +1,51 @@
-<p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+# Image Library
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+An image library built with ExpressJs, ReactJs, NextJs and Laravel
 
-## About Laravel
+## Key technologies
+- SPA with react
+- Server side rendering with nextjs
+- Oauth with laravel passport
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel attempts to take the pain out of development by easing common tasks used in the majority of web projects, such as:
+## Installation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+-   // Todo
 
-Laravel is accessible, yet powerful, providing tools needed for large, robust applications.
+## Improvements
 
-## Learning Laravel
+### client
+1. CSRF protection on the express server
+2. Improve frontend validations
+3. Add visual indicator on the frontend app so user knows a server load is in progress
+4. Authenticate via third party providers (eg facebook)
+5. lazy load images
+6. Add a nice notification system to render alerts
+7. Add a nice confirmation [dialog](https://github.com/Godofbrowser/vuejs-dialog/)
+8. Import configs and credentials
+9. infinite scroll
+9. Props validation (propTypes)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of any modern web application framework, making it a breeze to get started learning the framework.
+### api
+1. Add uuid to models to replace publicly available ids
+2. Save multiple image dimensions for faster page load
+3. (Efficiency) Find a way to prevent issuing too many redundant tokens
+4. Properly take care of attributes that should be hidden
+5. Ability to manage uploads
+6. Create separate endpoint for upload so user gets to fill in image details while upload and image processing is running in the background, before finally saving.
+7. Pagination
+8. Import configs and credentials
 
-If you're not in the mood to read, [Laracasts](https://laracasts.com) contains over 1100 video tutorials on a range of topics including Laravel, modern PHP, unit testing, JavaScript, and more. Boost the skill level of yourself and your entire team by digging into our comprehensive video library.
+## Known Bug
 
-## Laravel Sponsors
+The application allows users to view some content pages (home and images) as a guest and as an authentcated user.
+I have added a computed property `is_owner` to images such that the value is true if the current user is signed in and is the owner of the image, and false otherwise.
+Now, the problem is whenever a user views these pages  (home and images), the api doesn't seem to recognize them as authenticated and because of this the `is_owner` attribute becomes `false`. On the dashboard page which has the `auth` middleware, it works fine.
 
-We would like to extend our thanks to the following sponsors for helping fund on-going Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell):
+## Todo
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
 
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- Fix known bug
+- During upload, show another interface after clicking on upload that allows user add name, tags and set visibility of images (Upload begins in the background to save time while user fills these details)
+- Implement rating
+- Export configuration variables and credentials
+- Update readme with installation process
