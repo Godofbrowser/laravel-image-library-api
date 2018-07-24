@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Response;
 use Laravel\Passport\Exceptions\MissingScopeException;
@@ -88,22 +89,17 @@ class Handler extends ExceptionHandler
 		return Response::json(['error' => $exception->getMessage()], $exception->getCode());
 	}
 
-	protected function ConvertAppExceptionToResponse($request, AppException $exception)
+	protected function ConvertAppExceptionToResponse(Request $request, AppException $exception)
 	{
 		$status = $exception->getCode();
 
 		if ($request->expectsJson()){
-			// Render validations/errors for XHR request
-			$data = $exception->hasValidationMessages()
-				? $exception->getValidationMessages()
-				: ['error' => $exception->getMessage()];
+			// Render errors for XHR request
+			$data = ['error' => $exception->getMessage()];
 
 			return Response::json($data, $status);
 		}
 		else {
-
-			if ($exception->hasValidationMessages())
-				return Response::redirect()->back()->with('errors', $exception->getValidationMessages());
 
 			if (view()->exists("errors.$status")) {
 				return response()->view("errors.$status", [
@@ -116,10 +112,9 @@ class Handler extends ExceptionHandler
 				], $status);
 			}
 		}
-
 	}
 
-	private function TokenMismatchExceptionHandler($request, $exception)
+	private function TokenMismatchExceptionHandler(Request $request, $exception)
 	{
 		if ($request->expectsJson())
 			return response()->json(['error' => 'Token Expired/Invalid'], 401);
