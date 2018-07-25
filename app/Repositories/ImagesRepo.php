@@ -47,15 +47,27 @@ class ImagesRepo {
 		return $image;
 	}
 
-	public function extractImageInfo(UploadedFile $file) {
+	public function extractImageInfo($file) {
 		/** @var \Intervention\Image\Image $image */
-		$image = IntervImage::make($file->getRealPath());
+
+		if ($file instanceof UploadedFile){
+			$image = IntervImage::make($file->getRealPath());
+		} else {
+			$image = IntervImage::make($file);
+		}
 
 		return [
 			'width' => $image->width(),
 			'height' => $image->height(),
 			'size' => $file->getSize()
 		];
+	}
+
+	public function streamImage($resource, $format = 'png', $quality = 90) {
+		/** @var \Intervention\Image\Image $image */
+		$image = IntervImage::make($resource);
+
+		return $image->stream($format, $quality);
 	}
 
 	public function storeFile(UploadedFile $uploadedFile){

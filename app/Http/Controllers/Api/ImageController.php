@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\ApiException;
 use App\Models\Image;
 use App\Repositories\ImagesRepo;
+use Illuminate\Http\File;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\UploadedFile;
@@ -81,13 +82,11 @@ class ImageController extends Controller
 
 	public function upload (Request $request) {
 		$user = current_auth_user();
-		
-		logger($request->all());
-		logger('name: ' . $request->input('name'));
 
         $v = validator($request->all(), [
         	'name' => 'required|string|max:25',
-        	'image' => 'required|image|max:5000'
+        	'image_url' => 'sometimes|nullable|url',
+        	'image' => 'required_without:image_url|image|max:5000',
 		]);
 
         if ($v->fails())
@@ -95,8 +94,36 @@ class ImageController extends Controller
 
 		$uploadedFile = $request->file('image');
 
-		$filename = $this->imagesRepo->storeFile($uploadedFile);
-		$attributes = $this->imagesRepo->extractImageInfo($uploadedFile);
+        if($uploadedFile) {
+			$attributes = $this->imagesRepo->extractImageInfo($uploadedFile);
+			$filename = $this->imagesRepo->storeFile($uploadedFile);
+		} else {
+        	$image_url = $request->input('image_url');
+
+        	try {
+				$resource = file_get_contents($image_url);
+				$filename = str_random(30) . '.png';
+				$filePath = 'tmp/uploads/'. $filename;
+			} catch (\Exception $e) {
+        		throw ApiException::runtimeException($e->getMessage());
+			}
+
+			Storage::disk('local')
+				->put(
+					$filePath,
+					$this->imagesRepo->streamImage($resource, 'png')
+				);
+
+        	$fullPath = config('filesystems.disks.local.root');
+        	$fullPath .= DIRECTORY_SEPARATOR . $filePath;
+        	$uploadedFile = new UploadedFile($fullPath, $filename);
+
+			$attributes = $this->imagesRepo->extractImageInfo($uploadedFile);
+			$filename = $this->imagesRepo->storeFile($uploadedFile);
+
+			Storage::disk('local')->delete($filePath);
+		}
+
 
 		$image = $this->imagesRepo->create(
 			$user,
