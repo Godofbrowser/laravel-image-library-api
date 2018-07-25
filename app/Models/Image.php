@@ -59,8 +59,6 @@ class Image extends Model
 			->where('user_id', $user->getKey())
 			->take(1);
 
-		log_all($tempTableName);
-
 		return DB::query()
 			->selectRaw('EXISTS('.$query->toSql().')')
 			->mergeBindings($query->getQuery());
