@@ -82,6 +82,7 @@ class ImageController extends Controller
 	public function upload (Request $request) {
 		$user = current_auth_user();
 		
+		logger($request->all());
 		logger('name: ' . $request->input('name'));
 
         $v = validator($request->all(), [
