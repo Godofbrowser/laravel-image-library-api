@@ -28,7 +28,7 @@ class ImageController extends Controller
 	}
 
 	public function getUserImages(Request $request) {
-		$user = $request->user();
+		$user = current_auth_user();
 
 		$images = $user->images()->getQuery()
 			->withComputed(['is_owner'])
@@ -43,7 +43,7 @@ class ImageController extends Controller
 	}
 
 	public function getRecent(Request $request) {
-		$user = $request->user();
+		$user = current_auth_user();
 
 		$images = Image::query()
 			->withComputed(['is_owner'])
@@ -59,7 +59,7 @@ class ImageController extends Controller
 	}
 
 	public function getAllUploads(Request $request) {
-		$user = $request->user();
+		$user = current_auth_user();
 
 		$query = Image::query()
 			->withComputed(['is_owner'])
