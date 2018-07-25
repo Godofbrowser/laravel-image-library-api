@@ -50,7 +50,7 @@ class Image extends Model
 		if (is_null($user))
 			return DB::query()->selectRaw('false');
 
-		$tempTableName = str_random(7);
+		$tempTableName = self::getTable() .'_'. str_random(7);
 		$query = self::query()
 			->from(self::getTable() .' as '. $tempTableName)
 			->where(function (Builder $q) use($model, $tempTableName) {
@@ -58,6 +58,8 @@ class Image extends Model
 			})
 			->where('user_id', $user->getKey())
 			->take(1);
+
+		log_all($tempTableName);
 
 		return DB::query()
 			->selectRaw('EXISTS('.$query->toSql().')')
