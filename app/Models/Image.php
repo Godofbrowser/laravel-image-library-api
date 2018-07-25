@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Repositories\ImagesRepo;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -49,9 +50,14 @@ class Image extends Model
 		if (is_null($user))
 			return DB::query()->selectRaw('false');
 
+		$tempTableName = str_random(7);
 		$query = self::query()
-			->whereKey($model->id)
-			->where('user_id', $user->getKey());
+			->from(self::getTable() .' as '. $tempTableName)
+			->where(function (Builder $q) use($model, $tempTableName) {
+				$q->whereRaw($tempTableName .'.'. self::getKeyName() .' = ' . $model->id);
+			})
+			->where('user_id', $user->getKey())
+			->take(1);
 
 		return DB::query()
 			->selectRaw('EXISTS('.$query->toSql().')')
