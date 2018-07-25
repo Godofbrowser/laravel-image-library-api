@@ -37,7 +37,7 @@ class Image extends Model
 	public function getUrlAttribute() {
 		$config = config('site.uploads.images');
 		$path = $config['original']['path'];
-		return Storage::disk(config('filesystem.cloud'))
+		return Storage::disk(config('filesystems.cloud'))
 			->url($path . $this->getAttributeValue('filename'));
 	}
 

@@ -70,7 +70,7 @@ class ImagesRepo {
 		);
 
 		$resource = file_get_contents($uploadedFile->getRealPath());
-		Storage::disk(config('filesystem.cloud'))->put($path . $fileName, $resource);
+		Storage::disk(config('filesystems.cloud'))->put($path . $fileName, $resource, 'public');
 		return $fileName;
 	}
 
@@ -78,7 +78,7 @@ class ImagesRepo {
 		$config = config('site.uploads.images');
 		$path = $config['original']['path'];
 
-		Storage::disk(config('filesystem.cloud'))
+		Storage::disk(config('filesystems.cloud'))
 			->delete($path . $model->getAttributeValue('filename'));
 	}
 }
