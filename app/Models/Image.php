@@ -44,10 +44,7 @@ class Image extends Model
 	/* COMPUTED PROPERTIES */
 	public function computedIsOwner(ModelProxy $model) {
 		/** @var \App\Models\User $user */
-		$user = request()->user();
-
-		logger('com: ');
-		logger($user);
+		$user = current_auth_user();
 
 		if (is_null($user))
 			return DB::query()->selectRaw('false');

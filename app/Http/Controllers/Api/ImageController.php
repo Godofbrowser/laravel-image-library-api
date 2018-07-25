@@ -45,9 +45,6 @@ class ImageController extends Controller
 	public function getRecent(Request $request) {
 		$user = $request->user();
 
-		logger($request->headers
-		);
-
 		$images = Image::query()
 			->withComputed(['is_owner'])
 			->latest()
