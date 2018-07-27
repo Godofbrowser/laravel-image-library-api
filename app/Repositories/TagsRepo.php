@@ -34,7 +34,10 @@ class TagsRepo
 	public function generateSlug(string $name)
 	{
 		$count = 0;
-		$slug = strtolower($name) . ($count ? "--$count" : '');
+		$name = strtolower($name);
+		$name = preg_replace("/\s+/", '-', $name); // replace spaces with dash
+		$name = preg_replace("/[^\d\w\-]/", '', $name); // remove characters not (digit, word or underscore, dash)
+		$slug = $name . ($count ? "--$count" : '');
 
 		while (Tag::query()->withoutGlobalScopes()->where('slug', $slug)->exists()) {
 			$count++;

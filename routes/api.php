@@ -43,3 +43,9 @@ Route::get('user/images')
 	->uses('Api\ImageController@getUserImages')
 	->middleware('auth:api');
 
+Route::get('tags')
+	->uses('Api\TagController@getAllTags');
+
+Route::get('tag/{slug}/images')
+	->where('slug', '[\d\w\-]+')
+	->uses('Api\TagController@getTagImages');
