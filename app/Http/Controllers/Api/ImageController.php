@@ -5,9 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\ApiException;
 use App\Models\Image;
 use App\Repositories\ImagesRepo;
-use Illuminate\Http\File;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
@@ -32,6 +30,7 @@ class ImageController extends Controller
 		$user = current_auth_user();
 
 		$images = $user->images()->getQuery()
+			->withoutGlobalScope(Image::SCOPE_VISIBILITY)
 			->withComputed(['is_owner'])
 			->latest()
 			->get(12);
@@ -49,7 +48,7 @@ class ImageController extends Controller
 		$images = Image::query()
 			->withComputed(['is_owner'])
 			->latest()
-			->take(12)
+			->take(25)
 			->get();
 
 		return response()->json([
@@ -83,14 +82,11 @@ class ImageController extends Controller
 	public function upload (Request $request) {
 		$user = current_auth_user();
 
-        $v = validator($request->all(), [
-        	'name' => 'required|string|max:25',
+        $this->validate($request, [
+        	'name' => 'required|string|max:120',
         	'image_url' => 'sometimes|nullable|url',
         	'image' => 'required_without:image_url|image|max:5000',
 		]);
-
-        if ($v->fails())
-        	throw ApiException::runtimeException($v->errors()->first());
 
 		$uploadedFile = $request->file('image');
 
@@ -140,4 +136,23 @@ class ImageController extends Controller
 			'data' => $image
 		]);
     }
+
+    public function update(Request $request, $id) {
+		$user = current_auth_user();
+
+		$this->validate($request, [
+			'name' => 'required|string|max:120',
+			'visibility' => 'required|in:public,private'
+		]);
+
+		/** @var Image $image */
+		$image = $user->images()->getQuery()->whereKey($id)->first();
+
+		if (!$image) throw ApiException::runtimeException('Image not found');
+
+		$image->update([
+			'name' => $request->input('name'),
+			'flag_private' => $request->input('visibility') === 'private'
+		]);
+	}
 }

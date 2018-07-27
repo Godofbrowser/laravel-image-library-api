@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Repositories\ImagesRepo;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -13,6 +14,8 @@ use N7olkachev\ComputedProperties\ModelProxy;
 class Image extends Model
 {
 	use ComputedProperties;
+
+	const SCOPE_VISIBILITY = 'visibility';
 
 	protected $guarded = ['id'];
 
@@ -29,6 +32,10 @@ class Image extends Model
 			/** @var ImagesRepo $imageRepo */
 			$imageRepo = app(ImagesRepo::class);
 			$imageRepo->deleteFile($model);
+		});
+
+    	static::addGlobalScope(self::SCOPE_VISIBILITY, function(Builder $builder) {
+    		$builder->where('flag_private', false);
 		});
 
     	parent::boot();
@@ -50,10 +57,12 @@ class Image extends Model
 		if (is_null($user))
 			return DB::query()->selectRaw('false');
 
+		logger($user);
+
 		$tempTableName = self::getTable() .'_'. str_random(7);
-		$query = self::query()
+		$query = DB::query()
 			->from(self::getTable() .' as '. $tempTableName)
-			->where(function (Builder $q) use($model, $tempTableName) {
+			->where(function (QueryBuilder $q) use($model, $tempTableName) {
 				$q->whereRaw($tempTableName .'.'. self::getKeyName() .' = ' . $model->id);
 			})
 			->where('user_id', $user->getKey())
@@ -61,6 +70,6 @@ class Image extends Model
 
 		return DB::query()
 			->selectRaw('EXISTS('.$query->toSql().')')
-			->mergeBindings($query->getQuery());
+			->mergeBindings($query);
 	}
 }

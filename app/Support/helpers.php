@@ -11,6 +11,7 @@ if(!function_exists('current_auth_user')){
         return null;
     }
 }
+
 if(!function_exists('log_all')){
 	function log_all(){
 		$messages = func_get_args();
