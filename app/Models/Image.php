@@ -20,7 +20,8 @@ class Image extends Model
 	protected $guarded = ['id'];
 
     protected $casts = [
-    	'dimension' => 'array'
+    	'dimension' => 'array',
+		'flag_active' => 'boolean'
 	];
 
     protected $appends = [
@@ -39,6 +40,16 @@ class Image extends Model
 		});
 
     	parent::boot();
+	}
+
+	/* RELATIONS */
+	public function tags() {
+		return $this->belongsToMany(
+			Tag::class,
+			'image_tag',
+			'image_id',
+			'tag_id'
+		);
 	}
 
 	/* ATTRIBUTES */

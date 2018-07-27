@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Exceptions\ApiException;
 use App\Models\Image;
 use App\Repositories\ImagesRepo;
+use App\Repositories\TagsRepo;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -15,15 +16,21 @@ class ImageController extends Controller
 	 * @var \App\Repositories\ImagesRepo
 	 */
 	private $imagesRepo;
+	/**
+	 * @var \App\Repositories\TagsRepo
+	 */
+	private $tagsRepo;
 
 	/**
 	 * ImageController constructor.
 	 *
 	 * @param \App\Repositories\ImagesRepo $imagesRepo
+	 * @param \App\Repositories\TagsRepo $tagsRepo
 	 */
-	public function __construct(ImagesRepo $imagesRepo)
+	public function __construct(ImagesRepo $imagesRepo, TagsRepo $tagsRepo)
 	{
 		$this->imagesRepo = $imagesRepo;
+		$this->tagsRepo = $tagsRepo;
 	}
 
 	public function getUserImages(Request $request) {
@@ -83,7 +90,7 @@ class ImageController extends Controller
 		$user = current_auth_user();
 
         $this->validate($request, [
-        	'name' => 'required|string|max:120',
+        	'name' => 'string|max:120',
         	'image_url' => 'sometimes|nullable|url',
         	'image' => 'required_without:image_url|image|max:5000',
 		]);
@@ -120,20 +127,21 @@ class ImageController extends Controller
 			Storage::disk('local')->delete($filePath);
 		}
 
-
+		/** @var Image $image */
 		$image = $this->imagesRepo->create(
 			$user,
 			$request->input('name'),
 			$filename,
 			$attributes['width'],
 			$attributes['height'],
-			$attributes['size']
+			$attributes['size'],
+			($request->input('visibility') !== 'public')
 		);
 
 		return response()->json([
 			'status' => 'success',
 			'info' => 'upload successful',
-			'data' => $image
+			'data' => $image->makeVisible(['id'])
 		]);
     }
 
@@ -142,17 +150,38 @@ class ImageController extends Controller
 
 		$this->validate($request, [
 			'name' => 'required|string|max:120',
-			'visibility' => 'required|in:public,private'
+			'visibility' => 'required|in:public,private',
+			'tags' => 'array|max:10'
 		]);
 
 		/** @var Image $image */
-		$image = $user->images()->getQuery()->whereKey($id)->first();
+		$image = $user->images()
+			->getQuery()
+			->withoutGlobalScope(Image::SCOPE_VISIBILITY)
+			->whereKey($id)
+			->first();
 
 		if (!$image) throw ApiException::runtimeException('Image not found');
 
-		$image->update([
+		$attributes = [
 			'name' => $request->input('name'),
-			'flag_private' => $request->input('visibility') === 'private'
+			'flag_private' => $request->input('visibility') !== 'public'
+		];
+
+		$tags = $request->input('tags', null);
+		if ($tags && is_array($tags)) {
+			$tagnames = collect($tags)->map(function($tag) {
+				return is_array($tag) ? (isset($tag['text']) ? $tag['text'] : $tag) : $tag;
+			})->toArray();
+			$tags = $this->tagsRepo->getOrCreate($tagnames);
+		}
+
+		$this->imagesRepo->update($image, $attributes, $tags);
+
+		return response()->json([
+			'status' => 'success',
+			'info' => 'Update successful',
+			'data' => $image->makeVisible(['id'])
 		]);
 	}
 }

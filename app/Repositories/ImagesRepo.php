@@ -10,29 +10,16 @@ namespace App\Repositories;
 
 use App\Models\Image;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image as IntervImage;
 
 class ImagesRepo {
-	/**
-	 * @var \App\Models\Image
-	 */
-	private $image;
 
-	/**
-	 * ImagesRepo constructor.
-	 *
-	 * @param \App\Models\Image $image
-	 */
-	public function __construct(Image $image)
-	{
-		$this->image = $image;
-	}
-
-	public function create(User $user, $name, $filename, $width, $height, $size, $private = false) {
+	public function create(User $user, $name, $filename, $width, $height, $size, $private = true, EloquentCollection $tags = null) {
 		/** @var Image $image */
-		$image = $this->image->create([
+		$image = Image::query()->create([
 			'user_id' => $user->getKey(),
 			'name' => $name,
 			'filename' => $filename,
@@ -44,7 +31,27 @@ class ImagesRepo {
 			]
 		]);
 
+		$this->updateTags($image, $tags);
+
 		return $image;
+	}
+
+	public function update(Image $image, $attributes, EloquentCollection $tags = null) {
+		$image->update([
+			'name' => array_get($attributes, 'name', $image->getAttributeValue('name')),
+			'flag_private' => (bool) array_get($attributes, 'flag_private', $image->getAttribute('flag_private'))
+		]);
+
+		$this->updateTags($image, $tags);
+
+		return $image;
+	}
+
+	public static function updateTags(Image $image, EloquentCollection $tags = null) {
+		if ($tags && $tags->isNotEmpty()) {
+			// attach and/or detach tags here
+			$image->tags()->sync($tags);
+		}
 	}
 
 	public function extractImageInfo($file) {
