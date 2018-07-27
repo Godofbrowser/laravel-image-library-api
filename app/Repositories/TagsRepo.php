@@ -34,7 +34,7 @@ class TagsRepo
 	public function generateSlug(string $name)
 	{
 		$count = 0;
-		$slug = $name . ($count ? "--$count" : '');
+		$slug = strtolower($name) . ($count ? "--$count" : '');
 
 		while (Tag::query()->withoutGlobalScopes()->where('slug', $slug)->exists()) {
 			$count++;

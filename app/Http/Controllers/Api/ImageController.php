@@ -38,6 +38,7 @@ class ImageController extends Controller
 
 		$images = $user->images()->getQuery()
 			->withoutGlobalScope(Image::SCOPE_VISIBILITY)
+			->with('tags')
 			->withComputed(['is_owner'])
 			->latest()
 			->get(12);
@@ -53,6 +54,7 @@ class ImageController extends Controller
 		$user = current_auth_user();
 
 		$images = Image::query()
+			->with('tags')
 			->withComputed(['is_owner'])
 			->latest()
 			->take(25)
@@ -69,6 +71,7 @@ class ImageController extends Controller
 		$user = current_auth_user();
 
 		$query = Image::query()
+			->with('tags')
 			->withComputed(['is_owner'])
 			->latest()
 			->take(12);

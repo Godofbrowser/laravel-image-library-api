@@ -11,6 +11,8 @@ class Tag extends Model
 
 	static function boot () {
 		static::creating(function(self $model) {
+			$model->name = strtolower($model->name);
+
 			if (!isset($model->slug)) {
 				/** @var TagsRepo $tagsRepo */
 				$tagsRepo = app(TagsRepo::class);
