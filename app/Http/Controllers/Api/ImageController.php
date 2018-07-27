@@ -172,11 +172,13 @@ class ImageController extends Controller
 		];
 
 		$tags = $request->input('tags', null);
-		if ($tags && is_array($tags)) {
+		if (is_array($tags) && isset($tags[0])) {
 			$tagnames = collect($tags)->map(function($tag) {
 				return is_array($tag) ? (isset($tag['text']) ? $tag['text'] : $tag) : $tag;
 			})->toArray();
 			$tags = $this->tagsRepo->getOrCreate($tagnames);
+		}else {
+			$tags = null;
 		}
 
 		$this->imagesRepo->update($image, $attributes, $tags);
