@@ -21,7 +21,8 @@ class Image extends Model
 
     protected $casts = [
     	'dimension' => 'array',
-		'flag_active' => 'boolean'
+		'flag_active' => 'boolean',
+		'rating' => 'float'
 	];
 
     protected $appends = [
