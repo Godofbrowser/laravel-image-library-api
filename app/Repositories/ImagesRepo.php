@@ -100,4 +100,21 @@ class ImagesRepo {
 		Storage::disk(config('filesystems.cloud'))
 			->delete($path . $model->getAttributeValue('filename'));
 	}
+
+	public function rate(User $user, Image $image, $value)
+	{
+		$image->ratings()->create([
+			'value' => $value,
+			'user_id' => $user->getKey()
+		]);
+	}
+
+	public function computeRating(Image $image)
+	{
+		$q = $image->ratings()->getQuery();
+
+		$rating = round($q->sum('value') / $q->count(), 1);
+
+		$image->update(['rating' => $rating]);
+	}
 }

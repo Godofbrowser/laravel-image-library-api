@@ -39,6 +39,11 @@ Route::put('image/{id}')
 	->where('id', '\d+')
     ->middleware('auth:api');
 
+Route::post('image/{id}/rating')
+	->uses('Api\ImageController@submitRating')
+	->where('id', '\d+')
+    ->middleware('auth:api');
+
 Route::get('user/images')
 	->uses('Api\ImageController@getUserImages')
 	->middleware('auth:api');

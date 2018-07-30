@@ -7,8 +7,9 @@ See [Api repository](https://github.com/Godofbrowser/laravel-image-library-api) 
 See [App repository](https://github.com/Godofbrowser/react-image-library-app) - [live demo](http://image-library-app.herokuapp.com/)
 
 ## Key technologies
+- PWA with workbox
 - SPA with react
-- Server side rendering with nextjs
+- SSR with nextjs
 - Oauth with laravel passport
 
 ## Installation
@@ -22,12 +23,12 @@ See [App repository](https://github.com/Godofbrowser/react-image-library-app) - 
 2. Improve frontend validations
 3. Add visual indicator on the frontend app so user knows a server load is in progress
 4. Authenticate via third party providers (eg facebook)
-5. lazy load images
-6. Add a nice notification system to render alerts
+5. lazy load images (done)
+6. Add a nice notification system to render alerts (done)
 7. Add a nice confirmation [dialog](https://github.com/Godofbrowser/vuejs-dialog/)
 8. Import configs and credentials
 9. infinite scroll
-9. Props validation (propTypes)
+10. Ask guests to login or register when they try to rate an image
 
 ### api
 1. Add uuid to models to replace publicly available ids
@@ -37,20 +38,16 @@ See [App repository](https://github.com/Godofbrowser/react-image-library-app) - 
 5. Ability to manage uploads
 6. Create separate endpoint for upload so user gets to fill in image details while upload and image processing is running in the background, before finally saving.
 7. Pagination
-8. Import configs and credentials (done)
 
-## Known Bug (fixed - added a helper method to check a list of guards and return the authenticated user if any)
+### Ideas
+- Show images on a popup or single page when clicked with more details
+- Add recently viewed images section to the user dashboard
+- Add related images section to the single-image page
+- Add other images by user to the single-image page
+- Add a download button single-image page
 
-The application allows users to view some content pages (home and images) as a guest and as an authentcated user.
-I have added a computed property `is_owner` to images such that the value is true if the current user is signed in and is the owner of the image, and false otherwise.
-Now, the problem is whenever a user views these pages  (home and images), the api doesn't seem to recognize them as authenticated and because of this the `is_owner` attribute becomes `false`. On the dashboard page which has the `auth` middleware, it works fine.
 
 ## Todo
 
-
-- Fix known bug (done)
-- Export configuration variables and credentials (done)
-- During upload, show another interface after clicking on upload that allows user add name, tags and set visibility of images (Upload begins in the background to save time while user fills these details)
-- Implement rating
 - Update readme with installation process
-- Add axios http response interceptor to handle errors
+- Write tests

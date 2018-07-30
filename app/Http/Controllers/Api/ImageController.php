@@ -38,7 +38,7 @@ class ImageController extends Controller
 
 		$images = $user->images()->getQuery()
 			->withoutGlobalScope(Image::SCOPE_VISIBILITY)
-			->with('tags')
+			->with('tags', 'user')
 			->withComputed(['is_owner'])
 			->latest()
 			->get(12);
@@ -54,7 +54,7 @@ class ImageController extends Controller
 		$user = current_auth_user();
 
 		$images = Image::query()
-			->with('tags')
+			->with('tags', 'user')
 			->withComputed(['is_owner'])
 			->latest()
 			->take(25)
@@ -71,7 +71,7 @@ class ImageController extends Controller
 		$user = current_auth_user();
 
 		$query = Image::query()
-			->with('tags')
+			->with('tags', 'user')
 			->withComputed(['is_owner'])
 			->latest()
 			->take(12);
@@ -186,6 +186,34 @@ class ImageController extends Controller
 		return response()->json([
 			'status' => 'success',
 			'info' => 'Update successful',
+			'data' => $image->makeVisible(['id'])
+		]);
+	}
+
+    public function submitRating(Request $request, $id) {
+		$user = current_auth_user();
+
+		$this->validate($request, [
+			'value' => 'required|numeric|max:5|min:1'
+		]);
+
+		/** @var Image $image */
+		$image = $user->images()
+			->getQuery()
+			->withoutGlobalScope(Image::SCOPE_VISIBILITY)
+			->whereKey($id)
+			->first();
+
+		if (!$image) throw ApiException::runtimeException('Image not found');
+
+		if ($image->ratings()->where('user_id', $user->getKey())->exists())
+			throw ApiException::runtimeException('Ops! You can only rate an image once.');
+
+		$this->imagesRepo->rate($user, $image, $request->input('value'));
+
+		return response()->json([
+			'status' => 'success',
+			'info' => 'Rating successful',
 			'data' => $image->makeVisible(['id'])
 		]);
 	}
